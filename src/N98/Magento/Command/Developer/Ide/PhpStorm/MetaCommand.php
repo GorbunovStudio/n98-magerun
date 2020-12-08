@@ -438,28 +438,25 @@ PHP;
         $baseMap = <<<PHP
 <?php
 namespace PHPSTORM_META {
-    /** @noinspection PhpUnusedLocalVariableInspection */
-    /** @noinspection PhpIllegalArrayKeyTypeInspection */
-    /** @noinspection PhpLanguageLevelInspection */
-    \$STATIC_METHOD_TYPES = [
 PHP;
         $baseMap .= "\n";
         foreach ($this->groupFactories as $group => $methods) {
             $map = $baseMap;
             foreach ($methods as $method) {
-                $map .= "        " . $method . "('') => [\n";
+                $map .= "    override( " . $method . "(),\n";
+                $map .= "        map( [\n";
                 asort($classMaps[$group]);
                 foreach ($classMaps[$group] as $classPrefix => $class) {
                     if (preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $class)) {
-                        $map .= "            '$classPrefix' instanceof \\$class,\n";
+                        $map .= "            '$classPrefix' => \\$class::class,\n";
                     } else {
                         $output->writeln('<warning>Invalid class name <comment>' . $class . '</comment> ignored</warning>');
                     }
                 }
-                $map .= "        ], \n";
+                $map .= "        ])\n";
+                $map .= "    );\n";
             }
             $map .= <<<PHP
-    ];
 }
 PHP;
             if ($input->getOption('stdout')) {
